@@ -97,6 +97,9 @@ Rx String 2 True Result        | on
 ```
 
 
+Finally, I have a `Driver Event: Connected` in the Two-Way Strings Rx driver that asks Home Assistant to send all states upon connection.  The driver macro sends a string at the connection event, which Pyscript then triggers the `send_all_states()` function.  This is helpful for when either system is rebooted or updated so you don't have Null values in the RTI driver while waiting for the next state changed event to receive that information.  If there were intermittent connection issues on the TCP socket, this would also update any changes that happend since the two systems were last sync'd.
+
+
 Please see the RTI documentation for further driver information.
 
 
