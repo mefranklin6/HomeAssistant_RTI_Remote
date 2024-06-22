@@ -84,6 +84,19 @@ RX String 1 Suffix             | :state
 Rx String 7 Integer Multiplier | 1
 ```
 
+
+For something like the status of a switch or on/off of a system, you can use the Boolean Variable Type
+```
+RX String 2 Name               | home theater system state
+RX String 2                    | system
+RX String Variable Type        | Boolean (enter string to make the boolean true)
+RX String 2 Prefix             | system_home_theater:
+RX String 2 Suffix             | :state
+Rx String 2 True Result        | on
+
+```
+
+
 Please see the RTI documentation for further driver information.
 
 
