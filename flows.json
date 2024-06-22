@@ -1,0 +1,217 @@
+[
+    {
+        "id": "bb2d60c212bdada8",
+        "type": "tab",
+        "label": "RTI",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "9a2532e1ea0f6895",
+        "type": "tcp out",
+        "z": "bb2d60c212bdada8",
+        "name": "Send to RTI 41797",
+        "host": "",
+        "port": "41797",
+        "beserver": "server",
+        "base64": false,
+        "end": false,
+        "tls": "",
+        "x": 910,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "275268579db7727f",
+        "type": "server-state-changed",
+        "z": "bb2d60c212bdada8",
+        "name": "Tracked Lights State Changed",
+        "server": "f63d606.b2d29a",
+        "version": 5,
+        "outputs": 1,
+        "exposeAsEntityConfig": "",
+        "entityId": [
+            "light.shelf_strip",
+            "switch.livingroom_lamp",
+            "light.kitchen_main_lights"
+        ],
+        "entityIdType": "list",
+        "outputInitially": false,
+        "stateType": "str",
+        "ifState": "",
+        "ifStateType": "str",
+        "ifStateOperator": "is",
+        "outputOnlyOnStateChange": true,
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "ignorePrevStateNull": false,
+        "ignorePrevStateUnknown": false,
+        "ignorePrevStateUnavailable": false,
+        "ignoreCurrentStateUnknown": false,
+        "ignoreCurrentStateUnavailable": false,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            },
+            {
+                "property": "data",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "eventData"
+            },
+            {
+                "property": "topic",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "triggerId"
+            }
+        ],
+        "x": 180,
+        "y": 80,
+        "wires": [
+            [
+                "4d6bc1a4c1774617"
+            ]
+        ]
+    },
+    {
+        "id": "4d6bc1a4c1774617",
+        "type": "function",
+        "z": "bb2d60c212bdada8",
+        "name": "str format \"device:state\"",
+        "func": "let state = msg.payload\nlet device = msg.topic.replace(\".\", \"_\")\n\nreturn {\"payload\": `${device}:${state}:state`};\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 80,
+        "wires": [
+            [
+                "9a2532e1ea0f6895"
+            ]
+        ]
+    },
+    {
+        "id": "ce21826395e94530",
+        "type": "tcp in",
+        "z": "bb2d60c212bdada8",
+        "name": "Rx from RTI 41795",
+        "server": "server",
+        "host": "",
+        "port": "41795",
+        "datamode": "stream",
+        "datatype": "utf8",
+        "newline": "",
+        "topic": "",
+        "trim": false,
+        "base64": false,
+        "tls": "",
+        "x": 150,
+        "y": 260,
+        "wires": [
+            [
+                "c079c0d055a67ad5"
+            ]
+        ]
+    },
+    {
+        "id": "c079c0d055a67ad5",
+        "type": "ha-fire-event",
+        "z": "bb2d60c212bdada8",
+        "name": "Generate RTI_Rx Event",
+        "server": "f63d606.b2d29a",
+        "version": 0,
+        "event": "RTI_Rx",
+        "data": "{\"payload\": msg.payload}",
+        "dataType": "jsonata",
+        "x": 390,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6b52b8ca553e628d",
+        "type": "server-events",
+        "z": "bb2d60c212bdada8",
+        "name": "Pyscript RTI Events",
+        "server": "f63d606.b2d29a",
+        "version": 3,
+        "exposeAsEntityConfig": "",
+        "eventType": "rti_sync",
+        "eventData": "",
+        "waitForRunning": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "eventData"
+            },
+            {
+                "property": "topic",
+                "propertyType": "msg",
+                "value": "$outputData(\"eventData\").event_type",
+                "valueType": "jsonata"
+            }
+        ],
+        "x": 150,
+        "y": 160,
+        "wires": [
+            [
+                "43313fde8c0d95ca"
+            ]
+        ]
+    },
+    {
+        "id": "43313fde8c0d95ca",
+        "type": "function",
+        "z": "bb2d60c212bdada8",
+        "name": "drill down from event",
+        "func": "let data = msg.payload.event\nreturn data\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 160,
+        "wires": [
+            [
+                "4d6bc1a4c1774617"
+            ]
+        ]
+    },
+    {
+        "id": "f63d606.b2d29a",
+        "type": "server",
+        "name": "Home Assistant",
+        "version": 5,
+        "addon": true,
+        "rejectUnauthorizedCerts": true,
+        "ha_boolean": "y|yes|true|on|home|open",
+        "connectionDelay": false,
+        "cacheJson": true,
+        "heartbeat": false,
+        "heartbeatInterval": 30,
+        "areaSelector": "friendlyName",
+        "deviceSelector": "friendlyName",
+        "entitySelector": "friendlyName",
+        "statusSeparator": "at: ",
+        "statusYear": "hidden",
+        "statusMonth": "short",
+        "statusDay": "numeric",
+        "statusHourCycle": "h23",
+        "statusTimeFormat": "h:m",
+        "enableGlobalContextStore": true
+    }
+]
