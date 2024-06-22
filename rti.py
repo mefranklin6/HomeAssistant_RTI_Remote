@@ -1,5 +1,6 @@
 """Example Pyscript file to interact with RTI hardware"""
 
+# My custom Pyscript modules (stored in pyscript/modules)
 from media_player_helper import MediaPlayerHelper
 from light_helper import LightHelper
 from constants import (
