@@ -1,5 +1,5 @@
 # HomeAssistant_RTI_Remote
-Integrating RTI control systems and RTI remotes as extensions of Home Assistant
+Integrating RTI control systems and RTI remotes as extensions of Home Assistant (Two-Way communication)
 
 ## Reason
 - Home Assistant is an incredible FOSS home control system that works with almost everything, but it is just software.
