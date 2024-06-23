@@ -29,6 +29,7 @@ https://driverstore.rticontrol.com/driver/rti-two-way-strings
 
 To interact with the RTI system, I setup TCP listeners and senders in Node Red on two different ports.
 ![nodered](https://github.com/mefranklin6/HomeAssistant_RTI_Remote/assets/125914321/2f01a7b0-7757-4f8d-8ed4-7df1ecf6dfb9)
+This flow is shared in this repository as `flows.json`
 
 ### From RTI to HA
 In RTI, we edit the Driver Properties of our Tx "Two Way String" driver and manually make strings that can be easially interperted by the code we write on the Home Assistant side.
@@ -101,6 +102,7 @@ Finally, I have a `Driver Event: Connected` in the Two-Way Strings Rx driver tha
 
 
 Please see the RTI documentation for further driver information.
+
 
 
 
