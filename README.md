@@ -12,9 +12,9 @@ This project is my soloution to the above.  Use RTI hardware with Home Assistant
 
 - Not affiliated with Home Assistant or RTI Control company.
 
-- This project is purely academic, it may not be practical for actual use.
+- This project is purely academic, it may not be practical for actual use (but it's working great at my house).
 
-- This not a "driver", "integration" or "addon" for either system.  Without access to the RTI SDK, which requires special approval from RTI, there's no way to make the two systems sync up in a way that 'just works' out of the box.
+- This not a "driver", "integration" or "addon" for either system.  You'll be mapping events, states, and device actions between the two processors, so most of the work will be custom to your system.  (Without access to the RTI SDK, which requires special approval from RTI, there's no way to make the two systems sync up in a way that 'just works' out of the box.)
 
 - RTI systems can only be programmed by authorized parties.
 
@@ -65,7 +65,7 @@ Data is sent back to the RTI processor using another "Two-Way Strings" driver.  
 ![strformat](https://github.com/mefranklin6/HomeAssistant_RTI_Remote/assets/125914321/1cf8de5c-217d-4517-9431-c0192f1bea9c)
 
 
-The RTI driver does not like periods so `light.kitchen_main_lights` entity ID gets converted to `light_kitchen_main_lights` string before being sent.  You can simply have a `State Changed` node listening in Node Red like I have for lights, or you can fire "rti_sync" events in Pyscript that get picked up by the Pyscript event listener node as such:
+The RTI driver does not like periods so `light.kitchen_main_lights` entity ID gets converted to `light_kitchen_main_lights` string before being sent.  You can simply have a `State Changed` node listening in Node Red like I have for lights, or you can fire "rti_sync" events in Pyscript that get picked up by the  event listener node as such:
 
 ```python
 @state_trigger(LIVINGROOM_FAN)
@@ -81,7 +81,7 @@ RX String 1                    | fan
 RX String Variable Type        | Standard (String and Integer variables)
 RX String 1 Prefix             | fan_speed:
 RX String 1 Suffix             | :state
-Rx String 7 Integer Multiplier | 1
+Rx String 1 Integer Multiplier | 1
 ```
 
 
