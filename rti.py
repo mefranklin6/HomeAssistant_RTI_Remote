@@ -17,7 +17,7 @@ from constants import (
 )
 
 
-# RTI command mapped to AVR input name (AVR Dynamically names inputs based on CEC)
+# RTI command mapped to AVR input name (My AVR Dynamically names inputs based on CEC)
 avr_input = {"bluray": "UBP-X800", "streamer": "Roku Ultra", "pc": "8K"}
 
 # RTI command device names mapped to HA entity_id's
@@ -130,11 +130,11 @@ def handle_avr(command):
         media_player.volume_up(entity_id=AVR)
         return
 
-    if command == "voldown":
+    elif command == "voldown":
         media_player.volume_down(entity_id=AVR)
         return
 
-    if command == "mute":
+    elif command == "mute":
         mute_state = state.getattr(AVR)["is_volume_muted"]
         media_player.volume_mute(entity_id=AVR, is_volume_muted=not mute_state)
         return
@@ -217,7 +217,7 @@ def rti_message_received(**kwargs):
         if mode == "cmd":
             process_command_received(device, command)
         else:
-            log.warning(f"Unknown mode: {mode}")
+            log.warning(f"Mode not implemented: {mode}")
 
     except Exception as e:
         log.error(f"Error processing RTI command: {e}")
