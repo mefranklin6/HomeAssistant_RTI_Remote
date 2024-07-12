@@ -13,9 +13,10 @@ from constants import (
     ALARM_SWITCH,
 )
 
+# Home Assistant event type that our Node Red listener is subscribed to 
 RTI_EVENT_KEYWORD = "rti_sync"
 
-# RTI command mapped to AVR input name (AVR Dynamically names inputs based on CEC)
+# RTI command mapped to AVR input name (Denon AVR Dynamically names inputs based on CEC)
 avr_input = {"bluray": "UBP-X800", "streamer": "Roku Ultra", "pc": "8K"}
 
 # RTI command device names mapped to HA entity_id's
@@ -28,6 +29,10 @@ rti_tracked_lights = {
 
 
 def fire_rti_event(payload, topic):
+    """
+    Use this to send data back to the RTI controller
+    This fires a Home Assistant event which is picked up in the Node Red flow
+    """
     event.fire(RTI_EVENT_KEYWORD, payload=payload, topic=topic)
     task.sleep(0.5)
 
