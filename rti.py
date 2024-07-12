@@ -1,6 +1,3 @@
-"""Example Pyscript file to interact with RTI hardware"""
-
-# My custom Pyscript modules (stored in pyscript/modules)
 from media_player_helper import MediaPlayerHelper
 from light_helper import LightHelper
 from constants import (
@@ -16,8 +13,9 @@ from constants import (
     ALARM_SWITCH,
 )
 
+RTI_EVENT_KEYWORD = "rti_sync"
 
-# RTI command mapped to AVR input name (My AVR Dynamically names inputs based on CEC)
+# RTI command mapped to AVR input name (AVR Dynamically names inputs based on CEC)
 avr_input = {"bluray": "UBP-X800", "streamer": "Roku Ultra", "pc": "8K"}
 
 # RTI command device names mapped to HA entity_id's
@@ -27,6 +25,11 @@ rti_tracked_lights = {
     "livingroom_lamp": LIVINGROOM_LAMP,
     "kitchen_main_lights": KITCHEN_MAIN_LIGHTS,
 }
+
+
+def fire_rti_event(payload, topic):
+    event.fire(RTI_EVENT_KEYWORD, payload=payload, topic=topic)
+    task.sleep(0.5)
 
 
 def thermostat_info():
@@ -39,11 +42,9 @@ def thermostat_info():
 
 def send_thermostat_states():
     mode, current_temp, desired_temp = thermostat_info()
-    event.fire("rti_sync", payload=mode, topic="thermostat_mode")
-    task.sleep(0.5)
-    event.fire("rti_sync", payload=current_temp, topic="thermostat_current_temp")
-    task.sleep(0.5)
-    event.fire("rti_sync", payload=desired_temp, topic="thermostat_desired_temp")
+    fire_rti_event(payload=mode, topic="thermostat_mode")
+    fire_rti_event(payload=current_temp, topic="thermostat_current_temp")
+    fire_rti_event(payload=desired_temp, topic="thermostat_desired_temp")
 
 
 def send_security_states():
@@ -63,11 +64,9 @@ def send_security_states():
     if len(open_windows) == 0:
         open_windows = "All Windows Closed"
 
-    event.fire("rti_sync", payload=str(state.get(ALARM_SWITCH)), topic="alarm_switch")
-    task.sleep(0.5)
-    event.fire("rti_sync", payload=str(open_doors), topic="open_doors")
-    task.sleep(0.5)
-    event.fire("rti_sync", payload=str(open_windows), topic="open_windows")
+    fire_rti_event(payload=str(state.get(ALARM_SWITCH)), topic="alarm_switch")
+    fire_rti_event(payload=str(open_doors), topic="open_doors")
+    fire_rti_event(payload=str(open_windows), topic="open_windows")
 
 
 def send_all_states():
@@ -77,20 +76,15 @@ def send_all_states():
 
     tv_helper = MediaPlayerHelper()
     if tv_helper.livingroom_system_is_on():
-        task.sleep(0.5)
-        event.fire("rti_sync", payload="on", topic="system_home_theater")
+        fire_rti_event(payload="on", topic="system_home_theater")
     else:
-        task.sleep(0.5)
-        event.fire("rti_sync", payload="off", topic="system_home_theater")
+        fire_rti_event(payload="off", topic="system_home_theater")
 
     for light_id in rti_tracked_lights.values():
-        task.sleep(0.5)
         device_state = state.get(light_id)
-        event.fire("rti_sync", payload=device_state, topic=light_id)
+        fire_rti_event(payload=device_state, topic=light_id)
 
-    task.sleep(0.5)
     send_thermostat_states()
-    task.sleep(0.5)
     send_security_states()
 
 
@@ -130,11 +124,11 @@ def handle_avr(command):
         media_player.volume_up(entity_id=AVR)
         return
 
-    elif command == "voldown":
+    if command == "voldown":
         media_player.volume_down(entity_id=AVR)
         return
 
-    elif command == "mute":
+    if command == "mute":
         mute_state = state.getattr(AVR)["is_volume_muted"]
         media_player.volume_mute(entity_id=AVR, is_volume_muted=not mute_state)
         return
@@ -193,15 +187,15 @@ def process_command_received(device, command):
 def home_theater_state_changed(**kwargs):
     tv_helper = MediaPlayerHelper()
     if tv_helper.livingroom_system_is_on():
-        event.fire("rti_sync", payload="on", topic="system_home_theater")
+        fire_rti_event(payload="on", topic="system_home_theater")
     else:
-        event.fire("rti_sync", payload="off", topic="system_home_theater")
+        fire_rti_event(payload="off", topic="system_home_theater")
 
 
 @state_trigger(LIVINGROOM_FAN)
 def send_fan_state(**kwargs):
     speed = state.getattr(LIVINGROOM_FAN)["percentage"]
-    event.fire("rti_sync", payload=speed, topic="fan_speed")
+    fire_rti_event(payload=speed, topic="fan_speed")
 
 
 @event_trigger("RTI_Rx")
@@ -217,7 +211,7 @@ def rti_message_received(**kwargs):
         if mode == "cmd":
             process_command_received(device, command)
         else:
-            log.warning(f"Mode not implemented: {mode}")
+            log.warning(f"Unknown mode: {mode}")
 
     except Exception as e:
         log.error(f"Error processing RTI command: {e}")
