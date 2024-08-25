@@ -189,7 +189,7 @@ def process_command_received(device, command):
 
 @state_trigger(AVR)
 @state_trigger(LIVINGROOM_TV)
-def home_theater_state_changed(**kwargs):
+def home_theater_state_changed():
     tv_helper = MediaPlayerHelper()
     if tv_helper.livingroom_system_is_on():
         fire_rti_event(payload="on", topic="system_home_theater")
@@ -198,16 +198,14 @@ def home_theater_state_changed(**kwargs):
 
 
 @state_trigger(LIVINGROOM_FAN)
-def send_fan_state(**kwargs):
+def send_fan_state():
     speed = state.getattr(LIVINGROOM_FAN)["percentage"]
     fire_rti_event(payload=speed, topic="fan_speed")
 
 
 @event_trigger("RTI_Rx")
-def rti_message_received(**kwargs):
+def rti_message_received(payload=None):
     try:
-        payload = kwargs["payload"]
-
         split = payload.split(":")
         mode = split[0]
         device = split[1]
