@@ -70,7 +70,7 @@ The RTI driver does not like periods so `light.kitchen_main_lights` entity ID ge
 
 ```python
 @state_trigger(LIVINGROOM_FAN)
-def send_fan_state(**kwargs):
+def send_fan_state():
     speed = state.getattr(LIVINGROOM_FAN)["percentage"]
     event.fire("rti_sync", payload=speed, topic="fan_speed")
 ```
