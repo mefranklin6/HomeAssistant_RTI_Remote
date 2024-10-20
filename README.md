@@ -12,15 +12,15 @@ This project is my soloution to the above.  Use RTI hardware with Home Assistant
 
 - Not affiliated with Home Assistant or RTI Control company.
 
-- This project is purely academic, it may not be practical for actual use (but it's working great at my house).
+- This not a "driver", "integration" or "addon" for either system.  You'll be mapping events, states, and device actions between the two processors, so most of the work will be custom to your system.  The code in this repository is what i'm using at my own house, hopefully it can provide enough examples to get you started on your own system.  Feel free to message me with questions!  (Without access to the RTI SDK, which requires special approval from RTI, there's no way to make the two systems sync up in a way that 'just works' out of the box.)
 
-- This not a "driver", "integration" or "addon" for either system.  You'll be mapping events, states, and device actions between the two processors, so most of the work will be custom to your system.  (Without access to the RTI SDK, which requires special approval from RTI, there's no way to make the two systems sync up in a way that 'just works' out of the box.)
 
 - RTI systems can only be programmed by authorized parties.
 
+
 ## Architecture
 
-- To showcase the power of choice that comes with Home Assistant, this project uses a combination of Node-Red and Pyscript to interact with the RTI hardware.  Please see `rti.py` for the Pyscript file.
+- To showcase the power of choice that comes with Home Assistant, this project uses a combination of Node-Red and Pyscript to interact with the RTI hardware.  Please see `rti.py` for the Pyscript file that i'm running.  It should be possible to use only one or the other if that is your preference.
 
 - Most of the time, we want to send commands from RTI to Home Assistant, then have Home Assistant send back data such as device states.  The reverse is also possible which allows us to use RTI's extensive IR or RS232 library and hardware in Home Assistant.
 
@@ -48,7 +48,7 @@ Command String 1 Paramater Type | No paramater
 Command String 1                | cmd:kitchen_main_lights:on
 ```
 
-Any data received from the RTI processor simply gets turned into an "Event" in Home Assistant by the "Fire Event Node". 
+Any data received from the RTI processor simply gets turned into an "Event" in Home Assistant by the "Fire Event Node" of Node Red. 
 
 ![eventfire](https://github.com/mefranklin6/HomeAssistant_RTI_Remote/assets/125914321/52f1dc86-c2e3-435e-969d-c9561f40305e)
 
