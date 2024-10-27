@@ -64,12 +64,12 @@ def send_security_states():
     open_doors = []
     for door in DOORS:
         if state.get(door) == "on":
-            open_doors.append(state.getattr(door)["friendly_name"])
+            open_doors.append(state.get(f"{door}.friendly_name"))
 
     open_windows = []
     for window in WINDOWS:
         if state.get(window) == "on":
-            open_windows.append(state.getattr(window)["friendly_name"])
+            open_windows.append(state.get(f"{window}.friendly_name"))
 
     if len(open_doors) == 0:
         open_doors = "All Doors Closed"
@@ -157,31 +157,24 @@ def _update_tv_picture_mode(mode):
 
 
 def update_tv_brightness(percentage):
-    # Sets number helper in GUI
-    state.set(TV_BRIGHTNESS, percentage)
-
-    # Setting the brightness object above for some reason,
-    # does not trigger @state_changed when called from pyscript,
-    # so make the actual settings call here
-    vizio.update_setting(
-        entity_id=LIVINGROOM_TV,
-        setting_type="picture",
-        setting_name="backlight",
-        new_value=percentage,
-    )
+    input_number.set_value(entity_id=TV_BRIGHTNESS, value=percentage)
 
 
 def avr_mute_toggle():
-    mute_state = state.getattr(AVR)["is_volume_muted"]
+    mute_state = state.get(f"{AVR}.is_volume_muted")
     media_player.volume_mute(entity_id=AVR, is_volume_muted=not mute_state)
 
 
 def tv_antenna_macro():
-    if state.getattr(LIVINGROOM_TV)["source"] != TV_ANTENNA_SOURCE_NAME:
-        media_player.select_source(
-            entity_id=LIVINGROOM_TV, source=TV_ANTENNA_SOURCE_NAME
-        )
-    media_player.media_pause(entity_id=ROKU)
+    try:
+        if state.getattr(LIVINGROOM_TV)["source"] != TV_ANTENNA_SOURCE_NAME:
+            media_player.select_source(
+                entity_id=LIVINGROOM_TV, source=TV_ANTENNA_SOURCE_NAME
+            )
+    except KeyError:
+        return  # TV is off
+    except Exception as e:
+        log.error(f"Error in tv_antenna_macro: {e}")
 
 
 def _handle_avr_source_change(command):
@@ -193,20 +186,21 @@ def _handle_avr_source_change(command):
         log.warning(f"Source not found: {AVR_INPUT[command]}")
 
 
+def _avr_tv_input_minder():
+    try:
+        tv_input = state.getattr(LIVINGROOM_TV)["source"].upper()
+        if tv_input != TV_AVR_INPUT:
+            media_player.select_source(entity_id=LIVINGROOM_TV, source=TV_AVR_INPUT)
+    except KeyError:  # "Source" attribte dissapears when TV is off
+        return
+    except Exception as e:
+        log.error(f"Error in _avr_tv_input_minder: {e}")
+
+
 def _handle_avr(command):
-    tv_input = state.getattr(LIVINGROOM_TV)["source"].upper()
-    if tv_input != TV_AVR_INPUT:
-        media_player.select_source(entity_id=LIVINGROOM_TV, source=TV_AVR_INPUT)
+    _avr_tv_input_minder()
 
-    elif command == "volup":
-        media_player.volume_up(entity_id=AVR)
-        return
-
-    elif command == "voldown":
-        media_player.volume_down(entity_id=AVR)
-        return
-
-    elif command == "mute":
+    if command == "mute":
         avr_mute_toggle()
         return
 
@@ -221,6 +215,11 @@ def _handle_avr(command):
     elif command in AVR_INPUT:
         _update_tv_picture_mode(command)
         _handle_avr_source_change(command)
+        return
+
+    # Volume commands are handled via RS232 now
+    elif command in ["volup", "voldown"]:
+        return
 
     else:
         log.warning(f"Unknown AVR command: {command}")
@@ -279,7 +278,7 @@ def home_theater_state_changed():
 
 @state_trigger(LIVINGROOM_FAN)
 def send_fan_state():
-    speed = state.getattr(LIVINGROOM_FAN)["percentage"]
+    speed = state.get(f"{LIVINGROOM_FAN}.percentage")
     fire_rti_event(payload=speed, topic="fan_speed")
 
 
