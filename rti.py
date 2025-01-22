@@ -19,14 +19,6 @@ from media_player_helper import MediaPlayerHelper
 # Home Assistant event type that our Node Red listener is subscribed to
 RTI_EVENT_KEYWORD = "rti_sync"
 
-# The TV input that the AVR output is connected to
-TV_AVR_INPUT = "HDMI-2"
-
-TV_ANTENNA_SOURCE_NAME = "TV"
-
-# RTI command mapped to AVR input name (Denon AVR Dynamically names inputs based on CEC)
-AVR_INPUT = {"bluray": "UBP-X800", "streamer": "Roku Ultra", "pc": "8K"}
-
 # RTI command device names mapped to HA entity_id's
 # State change updates for these lights are handled in Node-RED
 rti_tracked_lights = {
@@ -34,6 +26,27 @@ rti_tracked_lights = {
     "livingroom_lamp": LIVINGROOM_LAMP,
     "kitchen_main_lights": KITCHEN_MAIN_LIGHTS,
 }
+
+"""
+The entertainment system that is controlled below has the following architecture:
+All HDMI devices are connected directly to the Denon AVR, 
+then the AVR sends video to the Vizio TV.
+
+A digital Over The Air (OTA) antenna is also connected directly to the TV.
+When used, sound is sent from the TV RCA output back to a input on the AVR
+"""
+
+# The TV input that the AVR output is connected to
+TV_AVR_INPUT = "HDMI-2"
+
+# Source name when using the OTA Antenna on the TV
+TV_ANTENNA_SOURCE_NAME = "TV"
+
+# Used for sending audio from TV to AVR (ex: OTA Antenna)
+AVR_TV_RCA_INPUT = "CD"
+
+# RTI command mapped to AVR input name (Denon AVR Dynamically names inputs based on CEC)
+AVR_INPUT = {"bluray": "UBP-X800", "streamer": "Roku Ultra", "pc": "8K"}
 
 
 def fire_rti_event(payload, topic):
@@ -86,6 +99,8 @@ def send_all_states():
     # RTI will request this on connection, which may be after reboot or RTI or HA
     # so we add in a delay to ensure both parties are ready
     task.sleep(5)
+
+    log.info("RTI Requested All States Update")
 
     tv_helper = MediaPlayerHelper()
     if tv_helper.livingroom_system_is_on():
@@ -171,6 +186,7 @@ def tv_antenna_macro():
             media_player.select_source(
                 entity_id=LIVINGROOM_TV, source=TV_ANTENNA_SOURCE_NAME
             )
+            media_player.select_source(entity_id=AVR, source=AVR_TV_RCA_INPUT)
     except KeyError:
         return  # TV is off
     except Exception as e:
@@ -191,6 +207,7 @@ def _avr_tv_input_minder():
         tv_input = state.getattr(LIVINGROOM_TV)["source"].upper()
         if tv_input != TV_AVR_INPUT:
             media_player.select_source(entity_id=LIVINGROOM_TV, source=TV_AVR_INPUT)
+            media_player.volume_mute(entity_id=AVR, is_volume_muted=False)
     except KeyError:  # "Source" attribte dissapears when TV is off
         return
     except Exception as e:
@@ -198,8 +215,6 @@ def _avr_tv_input_minder():
 
 
 def _handle_avr(command):
-    _avr_tv_input_minder()
-
     if command == "mute":
         avr_mute_toggle()
         return
@@ -213,6 +228,7 @@ def _handle_avr(command):
         return
 
     elif command in AVR_INPUT:
+        _avr_tv_input_minder()
         _update_tv_picture_mode(command)
         _handle_avr_source_change(command)
         return
