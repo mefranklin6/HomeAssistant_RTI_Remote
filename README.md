@@ -14,8 +14,15 @@ This project is my soloution to the above.  Use RTI hardware with Home Assistant
 
 - This not a "driver", "HA Custom Integration" or "addon" for either system.  You'll be mapping events, states, and device actions between the two processors, so most of the work will be custom to your system.  The code in this repository is what i'm using at my own house, hopefully it can provide enough examples to get you started on your own system.  Feel free to message me with questions!  (Without access to the RTI SDK, which requires special approval from RTI, there's no way to make the two systems sync up in a way that 'just works' out of the box.)
 
-
 - RTI systems can only be programmed by authorized parties.
+
+## Requirements
+
+- A RTI control processor that can load the "Two-Way Strings" driver, which should be most modern procesors (developed on XP-3)
+
+- Access to RTI Integration Designer Software for updating your programming
+
+- Basic networking knowledge, and intermediate Home Assistant programming knowledge
 
 
 ## Architecture
